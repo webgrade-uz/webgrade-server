@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Employee {
+  id          String   @id @default(uuid())
+  fullName    String
+  position    String   // Frontend Developer, Backend Developer, etc.
+  role        String?  // CEO, COO, CTO (optional)
+  about       String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Blog {
+  id        String      @id @default(uuid())
+  title     String
+  content   String
+  image     String?
+  views     Int         @default(0)
+  blogViews BlogView[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model BlogView {
+  id        String   @id @default(uuid())
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  ipAddress String
+  createdAt DateTime @default(now())
+
+  @@unique([blogId, ipAddress])
+}
