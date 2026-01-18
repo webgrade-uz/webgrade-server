@@ -31,9 +31,24 @@ export class BlogController {
   @Get('analytics/stats')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Blog analitikasi' })
-  async getAnalytics(@Query('days') days = 7) {
-    return this.blogService.getAnalytics(+days);
+  @ApiOperation({ summary: 'Blog analitikasi - kunlik, haftalik, oylik, yillik' })
+  async getAnalytics(@Query('period') period: string = 'daily') {
+    let days = 7;
+    switch (period) {
+      case 'daily':
+        days = 7; // Last 7 days
+        break;
+      case 'weekly':
+        days = 28; // Last 4 weeks
+        break;
+      case 'monthly':
+        days = 365; // Last 12 months
+        break;
+      case 'yearly':
+        days = 365 * 3; // Last 3 years
+        break;
+    }
+    return this.blogService.getAnalytics(days);
   }
 
   @Post()

@@ -69,31 +69,54 @@ export class BlogService {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const blogs = await this.prisma.blog.findMany({
+    // Get all blog views within the period
+    const blogViews = await this.prisma.blogView.findMany({
       where: {
         createdAt: {
           gte: startDate,
         },
       },
-      orderBy: { views: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        views: true,
-        createdAt: true,
-      },
+      orderBy: { createdAt: 'asc' },
     });
 
-    const totalViews = blogs.reduce((sum, blog) => sum + blog.views, 0);
+    // Group views by date
+    const viewsByDate = blogViews.reduce((acc, view) => {
+      const date = view.createdAt.toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Create array of dates with views
+    const dailyViews: { date: string; views: number; displayDate?: string }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Format display date with day name and full date
+      const displayDate = date.toLocaleDateString('uz-UZ', { 
+        weekday: 'short', 
+        day: '2-digit', 
+        month: 'short',
+        year: 'numeric'
+      });
+      
+      dailyViews.push({
+        date: dateStr,
+        displayDate,
+        views: viewsByDate[dateStr] || 0,
+      });
+    }
+
+    const totalViews = blogViews.length;
 
     return {
       success: true,
       message: `${days} kunlik blog analitikasi`,
       data: {
         period: `${days} kun`,
-        totalBlogs: blogs.length,
         totalViews,
-        blogs,
+        dailyViews,
       },
     };
   }
