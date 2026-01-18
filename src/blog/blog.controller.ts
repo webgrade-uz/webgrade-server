@@ -24,7 +24,11 @@ export class BlogController {
   @Get(':id')
   @ApiOperation({ summary: 'Blog ID orqali' })
   async getBlog(@Param('id') id: string, @Req() req: any) {
-    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    // Get real client IP from X-Forwarded-For header (for proxies) or fallback to req.ip
+    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
+                      req.ip || 
+                      req.connection.remoteAddress || 
+                      'unknown';
     return this.blogService.getBlog(id, ipAddress);
   }
 
