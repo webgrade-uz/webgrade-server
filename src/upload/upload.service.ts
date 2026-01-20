@@ -3,14 +3,28 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
+import { mkdir } from 'fs/promises';
 import { FILE_CONFIG, MESSAGES } from '../common/constants/messages';
 
 @Injectable()
 export class UploadService {
+  private uploadDir = FILE_CONFIG.UPLOAD_DIR;
+
+  async ensureUploadDir() {
+    try {
+      await mkdir(this.uploadDir, { recursive: true });
+    } catch (error) {
+      console.log('Upload papkasini yaratishda xato:', error);
+    }
+  }
+
   getMulterConfig() {
     return {
       storage: diskStorage({
-        destination: FILE_CONFIG.UPLOAD_DIR,
+        destination: async (req, file, cb) => {
+          await this.ensureUploadDir();
+          cb(null, this.uploadDir);
+        },
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
@@ -28,12 +42,19 @@ export class UploadService {
     };
   }
 
+  getFileUrl(filename: string): string {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    return `${baseUrl}/uploads/${filename}`;
+  }
+
   async deleteFile(filePath: string): Promise<void> {
     try {
-      if (filePath && filePath.startsWith('/uploads/')) {
-        const fileName = filePath.replace('/uploads/', '');
-        const fullPath = join(process.cwd(), FILE_CONFIG.UPLOAD_DIR, fileName);
-        await unlink(fullPath);
+      if (filePath) {
+        const fileName = filePath.split('/').pop();
+        if (fileName) {
+          const fullPath = join(this.uploadDir, fileName);
+          await unlink(fullPath);
+        }
       }
     } catch (error) {
       console.log('File o\'chirishda xato:', error);

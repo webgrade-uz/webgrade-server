@@ -17,7 +17,7 @@ export const MESSAGES = {
 };
 
 export const FILE_CONFIG = {
-  UPLOAD_DIR: './uploads',
+  UPLOAD_DIR: process.env.NODE_ENV === 'production' ? './uploads' : './uploads',
   ALLOWED_EXTENSIONS: /\.(jpg|jpeg|png|gif)$/,
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
 };

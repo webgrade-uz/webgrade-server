@@ -13,7 +13,7 @@ export class BlogController {
   constructor(
     private blogService: BlogService,
     private uploadService: UploadService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'Barcha bloglar (pagination)' })
@@ -25,10 +25,10 @@ export class BlogController {
   @ApiOperation({ summary: 'Blog ID orqali' })
   async getBlog(@Param('id') id: string, @Req() req: any) {
     // Get real client IP from X-Forwarded-For header (for proxies) or fallback to req.ip
-    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || 
-                      req.ip || 
-                      req.connection.remoteAddress || 
-                      'unknown';
+    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
+      req.ip ||
+      req.connection.remoteAddress ||
+      'unknown';
     return this.blogService.getBlog(id, ipAddress);
   }
 
@@ -67,7 +67,7 @@ export class BlogController {
       content: createBlogDto.content,
     };
     if (file) {
-      blogData.image = `/uploads/${file.filename}`;
+      blogData.image = this.uploadService.getFileUrl(file.filename);
     }
     return this.blogService.createBlog(blogData);
   }
@@ -84,7 +84,7 @@ export class BlogController {
       content: updateBlogDto.content,
     };
     if (file) {
-      blogData.image = `/uploads/${file.filename}`;
+      blogData.image = this.uploadService.getFileUrl(file.filename);
     }
     return this.blogService.updateBlog(id, blogData);
   }

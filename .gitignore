@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/uploads
 
 # Logs
 logs
@@ -40,6 +41,7 @@ lerna-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 .env.local
 
 # temp directory

@@ -13,7 +13,7 @@ export class EmployeeController {
   constructor(
     private employeeService: EmployeeService,
     private uploadService: UploadService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'Barcha xodimlar (pagination)' })
@@ -41,7 +41,7 @@ export class EmployeeController {
       about: createEmployeeDto.about,
     };
     if (file) {
-      employeeData.image = `/uploads/${file.filename}`;
+      employeeData.image = this.uploadService.getFileUrl(file.filename);
     }
     return this.employeeService.createEmployee(employeeData);
   }
@@ -60,7 +60,7 @@ export class EmployeeController {
       about: updateEmployeeDto.about,
     };
     if (file) {
-      employeeData.image = `/uploads/${file.filename}`;
+      employeeData.image = this.uploadService.getFileUrl(file.filename);
     }
     return this.employeeService.updateEmployee(id, employeeData);
   }
