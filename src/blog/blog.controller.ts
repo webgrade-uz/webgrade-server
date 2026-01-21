@@ -21,17 +21,6 @@ export class BlogController {
     return this.blogService.getBlogs(+page, +limit);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Blog ID orqali' })
-  async getBlog(@Param('id') id: string, @Req() req: any) {
-    // Get real client IP from X-Forwarded-For header (for proxies) or fallback to req.ip
-    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
-      req.ip ||
-      req.connection.remoteAddress ||
-      'unknown';
-    return this.blogService.getBlog(id, ipAddress);
-  }
-
   @Get('analytics/stats')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -53,6 +42,17 @@ export class BlogController {
         break;
     }
     return this.blogService.getAnalytics(days);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Blog ID orqali' })
+  async getBlog(@Param('id') id: string, @Req() req: any) {
+    // Get real client IP from X-Forwarded-For header (for proxies) or fallback to req.ip
+    const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
+      req.ip ||
+      req.connection.remoteAddress ||
+      'unknown';
+    return this.blogService.getBlog(id, ipAddress);
   }
 
   @Post()
