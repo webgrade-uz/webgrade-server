@@ -67,7 +67,6 @@ export class BlogController {
       content: createBlogDto.content,
       description: createBlogDto.description,
       keywords: createBlogDto.keywords,
-      slug: createBlogDto.slug,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);
@@ -87,7 +86,6 @@ export class BlogController {
       content: updateBlogDto.content,
       description: updateBlogDto.description,
       keywords: updateBlogDto.keywords,
-      slug: updateBlogDto.slug,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);

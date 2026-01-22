@@ -15,7 +15,4 @@ export class CreateBlogWithFileDto {
 
   @ApiProperty({ example: 'blog, seo, keyword1, keyword2', required: false })
   keywords?: string;
-
-  @ApiProperty({ example: 'blog-sarlavhasi', required: false })
-  slug?: string;
 }

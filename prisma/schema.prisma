@@ -33,7 +33,6 @@ model Blog {
   image       String?
   description String?     // Meta description for SEO
   keywords    String?     // SEO keywords (comma-separated)
-  slug        String      @unique // URL-friendly slug
   views       Int         @default(0)
   blogViews   BlogView[]
   createdAt   DateTime    @default(now())

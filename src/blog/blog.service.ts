@@ -12,15 +12,6 @@ export class BlogService {
     private uploadService: UploadService,
   ) { }
 
-  private generateSlug(title: string): string {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-  }
-
   async getBlogs(page: number = PAGINATION.DEFAULT_PAGE, limit: number = PAGINATION.DEFAULT_LIMIT): Promise<ApiResponse> {
     const skip = (page - 1) * limit;
     const [blogs, total] = await Promise.all([
@@ -131,13 +122,8 @@ export class BlogService {
   }
 
   async createBlog(createBlogDto: CreateBlogDto): Promise<ApiResponse> {
-    const slug = createBlogDto.slug || this.generateSlug(createBlogDto.title);
-
     const blog = await this.prisma.blog.create({
-      data: {
-        ...createBlogDto,
-        slug,
-      },
+      data: createBlogDto,
     });
     return {
       success: true,
@@ -153,14 +139,9 @@ export class BlogService {
       await this.uploadService.deleteFile(oldBlog.image);
     }
 
-    const slug = updateBlogDto.slug || this.generateSlug(updateBlogDto.title);
-
     const blog = await this.prisma.blog.update({
       where: { id },
-      data: {
-        ...updateBlogDto,
-        slug,
-      },
+      data: updateBlogDto,
     });
 
     return {
