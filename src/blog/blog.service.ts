@@ -10,7 +10,16 @@ export class BlogService {
   constructor(
     private prisma: PrismaService,
     private uploadService: UploadService,
-  ) {}
+  ) { }
+
+  private generateSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
 
   async getBlogs(page: number = PAGINATION.DEFAULT_PAGE, limit: number = PAGINATION.DEFAULT_LIMIT): Promise<ApiResponse> {
     const skip = (page - 1) * limit;
@@ -92,15 +101,15 @@ export class BlogService {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      
+
       // Format display date with day name and full date
-      const displayDate = date.toLocaleDateString('uz-UZ', { 
-        weekday: 'short', 
-        day: '2-digit', 
+      const displayDate = date.toLocaleDateString('uz-UZ', {
+        weekday: 'short',
+        day: '2-digit',
         month: 'short',
         year: 'numeric'
       });
-      
+
       dailyViews.push({
         date: dateStr,
         displayDate,
@@ -122,7 +131,14 @@ export class BlogService {
   }
 
   async createBlog(createBlogDto: CreateBlogDto): Promise<ApiResponse> {
-    const blog = await this.prisma.blog.create({ data: createBlogDto });
+    const slug = createBlogDto.slug || this.generateSlug(createBlogDto.title);
+
+    const blog = await this.prisma.blog.create({
+      data: {
+        ...createBlogDto,
+        slug,
+      },
+    });
     return {
       success: true,
       message: MESSAGES.BLOG_CREATED,
@@ -137,9 +153,14 @@ export class BlogService {
       await this.uploadService.deleteFile(oldBlog.image);
     }
 
+    const slug = updateBlogDto.slug || this.generateSlug(updateBlogDto.title);
+
     const blog = await this.prisma.blog.update({
       where: { id },
-      data: updateBlogDto,
+      data: {
+        ...updateBlogDto,
+        slug,
+      },
     });
 
     return {

@@ -65,6 +65,9 @@ export class BlogController {
     const blogData: CreateBlogDto = {
       title: createBlogDto.title,
       content: createBlogDto.content,
+      description: createBlogDto.description,
+      keywords: createBlogDto.keywords,
+      slug: createBlogDto.slug,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);
@@ -82,6 +85,9 @@ export class BlogController {
     const blogData: CreateBlogDto = {
       title: updateBlogDto.title,
       content: updateBlogDto.content,
+      description: updateBlogDto.description,
+      keywords: updateBlogDto.keywords,
+      slug: updateBlogDto.slug,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);

@@ -27,14 +27,17 @@ model Employee {
 }
 
 model Blog {
-  id        String      @id @default(uuid())
-  title     String
-  content   String
-  image     String?
-  views     Int         @default(0)
-  blogViews BlogView[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id          String      @id @default(uuid())
+  title       String
+  content     String
+  image       String?
+  description String?     // Meta description for SEO
+  keywords    String?     // SEO keywords (comma-separated)
+  slug        String      @unique // URL-friendly slug
+  views       Int         @default(0)
+  blogViews   BlogView[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model BlogView {
