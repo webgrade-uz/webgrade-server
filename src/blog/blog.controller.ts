@@ -6,6 +6,7 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { CreateBlogWithFileDto } from './dto/create-blog-with-file.dto';
 import { JwtAuthGuard } from '../admin/jwt-auth.guard';
 import { UploadService } from '../upload/upload.service';
+import { multerConfig } from '../upload/multer.config';
 
 @ApiTags('Blog')
 @Controller('blog')
@@ -29,16 +30,16 @@ export class BlogController {
     let days = 7;
     switch (period) {
       case 'daily':
-        days = 7; // Last 7 days
+        days = 7;
         break;
       case 'weekly':
-        days = 28; // Last 4 weeks
+        days = 28;
         break;
       case 'monthly':
-        days = 365; // Last 12 months
+        days = 365;
         break;
       case 'yearly':
-        days = 365 * 3; // Last 3 years
+        days = 365 * 3;
         break;
     }
     return this.blogService.getAnalytics(days);
@@ -47,7 +48,6 @@ export class BlogController {
   @Get(':id')
   @ApiOperation({ summary: 'Blog ID orqali' })
   async getBlog(@Param('id') id: string, @Req() req: any) {
-    // Get real client IP from X-Forwarded-For header (for proxies) or fallback to req.ip
     const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
       req.ip ||
       req.connection.remoteAddress ||
@@ -57,16 +57,22 @@ export class BlogController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', new UploadService().getMulterConfig()))
+  @UseInterceptors(FileInterceptor('image', multerConfig))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Blog yaratish (rasm bilan)' })
-  async createBlog(@Body() createBlogDto: CreateBlogWithFileDto, @UploadedFile() file?: Express.Multer.File) {
+  async createBlog(
+    @Body('title') title: string,
+    @Body('content') content: string,
+    @Body('description') description?: string,
+    @Body('keywords') keywords?: string,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     const blogData: CreateBlogDto = {
-      title: createBlogDto.title,
-      content: createBlogDto.content,
-      description: createBlogDto.description,
-      keywords: createBlogDto.keywords,
+      title,
+      content,
+      description,
+      keywords,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);
@@ -76,16 +82,23 @@ export class BlogController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', new UploadService().getMulterConfig()))
+  @UseInterceptors(FileInterceptor('image', multerConfig))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Blog o\'zgartirish' })
-  async updateBlog(@Param('id') id: string, @Body() updateBlogDto: CreateBlogWithFileDto, @UploadedFile() file?: Express.Multer.File) {
+  async updateBlog(
+    @Param('id') id: string,
+    @Body('title') title: string,
+    @Body('content') content: string,
+    @Body('description') description?: string,
+    @Body('keywords') keywords?: string,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     const blogData: CreateBlogDto = {
-      title: updateBlogDto.title,
-      content: updateBlogDto.content,
-      description: updateBlogDto.description,
-      keywords: updateBlogDto.keywords,
+      title,
+      content,
+      description,
+      keywords,
     };
     if (file) {
       blogData.image = this.uploadService.getFileUrl(file.filename);

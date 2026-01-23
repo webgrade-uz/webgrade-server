@@ -17,6 +17,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = (exceptionResponse as any).message || exception.message;
     } else if (exception instanceof Error) {
       message = exception.message;
+      console.error('Server Error:', exception);
     }
 
     const apiResponse: ApiResponse = {

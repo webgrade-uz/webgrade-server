@@ -10,9 +10,16 @@ import { FILE_CONFIG, MESSAGES } from '../common/constants/messages';
 export class UploadService {
   private uploadDir = FILE_CONFIG.UPLOAD_DIR;
 
-  async ensureUploadDir() {
+  constructor() {
+    this.ensureUploadDirSync();
+  }
+
+  private ensureUploadDirSync() {
     try {
-      await mkdir(this.uploadDir, { recursive: true });
+      const fs = require('fs');
+      if (!fs.existsSync(this.uploadDir)) {
+        fs.mkdirSync(this.uploadDir, { recursive: true });
+      }
     } catch (error) {
       console.log('Upload papkasini yaratishda xato:', error);
     }
@@ -21,8 +28,7 @@ export class UploadService {
   getMulterConfig() {
     return {
       storage: diskStorage({
-        destination: async (req, file, cb) => {
-          await this.ensureUploadDir();
+        destination: (req, file, cb) => {
           cb(null, this.uploadDir);
         },
         filename: (req, file, cb) => {
@@ -38,6 +44,9 @@ export class UploadService {
           return cb(new Error(MESSAGES.INVALID_FILE_TYPE), false);
         }
         cb(null, true);
+      },
+      limits: {
+        fileSize: FILE_CONFIG.MAX_FILE_SIZE,
       },
     };
   }

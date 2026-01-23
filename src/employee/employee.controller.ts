@@ -6,6 +6,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { CreateEmployeeWithFileDto } from './dto/create-employee-with-file.dto';
 import { JwtAuthGuard } from '../admin/jwt-auth.guard';
 import { UploadService } from '../upload/upload.service';
+import { multerConfig } from '../upload/multer.config';
 
 @ApiTags('Employee')
 @Controller('employee')
@@ -21,24 +22,24 @@ export class EmployeeController {
     return this.employeeService.getEmployees(+page, +limit);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Xodim ID orqali' })
-  async getEmployee(@Param('id') id: string) {
-    return this.employeeService.getEmployee(id);
-  }
-
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', new UploadService().getMulterConfig()))
+  @UseInterceptors(FileInterceptor('image', multerConfig))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Xodim qo\'shish (rasm bilan)' })
-  async createEmployee(@Body() createEmployeeDto: CreateEmployeeWithFileDto, @UploadedFile() file?: Express.Multer.File) {
+  async createEmployee(
+    @Body('fullName') fullName: string,
+    @Body('position') position: string,
+    @Body('role') role: string,
+    @Body('about') about: string,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     const employeeData: CreateEmployeeDto = {
-      fullName: createEmployeeDto.fullName,
-      position: createEmployeeDto.position,
-      role: createEmployeeDto.role,
-      about: createEmployeeDto.about,
+      fullName,
+      position,
+      role,
+      about,
     };
     if (file) {
       employeeData.image = this.uploadService.getFileUrl(file.filename);
@@ -46,18 +47,31 @@ export class EmployeeController {
     return this.employeeService.createEmployee(employeeData);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Xodim ID orqali' })
+  async getEmployee(@Param('id') id: string) {
+    return this.employeeService.getEmployee(id);
+  }
+
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', new UploadService().getMulterConfig()))
+  @UseInterceptors(FileInterceptor('image', multerConfig))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Xodim o\'zgartirish' })
-  async updateEmployee(@Param('id') id: string, @Body() updateEmployeeDto: CreateEmployeeWithFileDto, @UploadedFile() file?: Express.Multer.File) {
+  async updateEmployee(
+    @Param('id') id: string,
+    @Body('fullName') fullName: string,
+    @Body('position') position: string,
+    @Body('role') role: string,
+    @Body('about') about: string,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     const employeeData: CreateEmployeeDto = {
-      fullName: updateEmployeeDto.fullName,
-      position: updateEmployeeDto.position,
-      role: updateEmployeeDto.role,
-      about: updateEmployeeDto.about,
+      fullName,
+      position,
+      role,
+      about,
     };
     if (file) {
       employeeData.image = this.uploadService.getFileUrl(file.filename);

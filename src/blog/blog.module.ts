@@ -6,6 +6,15 @@ import { UploadService } from '../upload/upload.service';
 
 @Module({
   controllers: [BlogController],
-  providers: [BlogService, PrismaService, UploadService],
+  providers: [
+    BlogService,
+    PrismaService,
+    UploadService,
+    {
+      provide: 'MULTER_CONFIG',
+      useFactory: (uploadService: UploadService) => uploadService.getMulterConfig(),
+      inject: [UploadService],
+    },
+  ],
 })
-export class BlogModule {}
+export class BlogModule { }
