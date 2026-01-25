@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { UploadService } from '../upload/upload.service';
+import { TelegramService } from '../common/services/telegram.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { ApiResponse } from '../common/interfaces/api-response.interface';
 import { MESSAGES, PAGINATION } from '../common/constants/messages';
@@ -10,6 +11,7 @@ export class BlogService {
   constructor(
     private prisma: PrismaService,
     private uploadService: UploadService,
+    private telegramService: TelegramService,
   ) { }
 
   async getBlogs(page: number = PAGINATION.DEFAULT_PAGE, limit: number = PAGINATION.DEFAULT_LIMIT): Promise<ApiResponse> {
@@ -125,6 +127,11 @@ export class BlogService {
     const blog = await this.prisma.blog.create({
       data: createBlogDto,
     });
+
+    // Telegram'ga xabar yuborish
+    const message = this.telegramService.formatBlogNotification(blog);
+    await this.telegramService.sendMessage(message);
+
     return {
       success: true,
       message: MESSAGES.BLOG_CREATED,

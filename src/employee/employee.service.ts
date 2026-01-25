@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { UploadService } from '../upload/upload.service';
+import { TelegramService } from '../common/services/telegram.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { ApiResponse } from '../common/interfaces/api-response.interface';
 import { PAGINATION } from '../common/constants/messages';
@@ -10,7 +11,8 @@ export class EmployeeService {
   constructor(
     private prisma: PrismaService,
     private uploadService: UploadService,
-  ) {}
+    private telegramService: TelegramService,
+  ) { }
 
   async getEmployees(page: number = PAGINATION.DEFAULT_PAGE, limit: number = PAGINATION.DEFAULT_LIMIT): Promise<ApiResponse> {
     const skip = (page - 1) * limit;
@@ -50,6 +52,11 @@ export class EmployeeService {
 
   async createEmployee(createEmployeeDto: CreateEmployeeDto): Promise<ApiResponse> {
     const employee = await this.prisma.employee.create({ data: createEmployeeDto });
+
+    // Telegram'ga xabar yuborish
+    const message = this.telegramService.formatEmployeeNotification(employee);
+    await this.telegramService.sendMessage(message);
+
     return {
       success: true,
       message: 'Xodim qo\'shildi',
